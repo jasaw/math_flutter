@@ -1,0 +1,13 @@
+{
+  "name": "math-webui",
+  "version": "1.0.0",
+  "private": "true",
+  "description": "Math Web UI",
+  "dependencies": {
+    "async": "^3.2.4",
+    "body-parser": "*",
+    "express": "*",
+    "socket.io": "*",
+    "sqlite3": "^5.1.4"
+  }
+}

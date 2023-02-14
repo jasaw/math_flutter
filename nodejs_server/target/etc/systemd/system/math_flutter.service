@@ -1,0 +1,19 @@
+[Unit]
+Description=Math Flutter
+After=multi-user.target
+
+[Service]
+WorkingDirectory=/home/pi/math_flutter
+ExecStart=/usr/bin/node /home/pi/math_flutter/index.js
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=90
+StartLimitInterval=400
+StartLimitBurst=3
+StandardOutput=syslog
+SyslogIdentifier=math_flutter
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
