@@ -39,7 +39,7 @@ dependencies:
 
   async: ^2.10.0
   auto_size_text: ^3.0.0-nullsafety.0
-  web_socket_channel: ^2.2.0
+  web_socket_channel: ^2.3.0
   flutter_bloc: 8.1.2
   bloc_concurrency: 0.2.1
   fimber: ^0.6.6

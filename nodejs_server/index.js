@@ -1,7 +1,8 @@
+const WebSocket = require('ws');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+// var io = require('socket.io')(http);
 var fs = require('fs');
 //var path = require('path');
 var bodyParser = require('body-parser');
@@ -62,74 +63,100 @@ app.get('/', function(req, res) {
 process.on('exit', cleanup);
 
 
-var sockets = {};
-io.on('connection', function(socket) {
-  sockets[socket.id] = socket;
-  console.log("Total clients connected : ", numClients());
+const wss = new WebSocket.Server({ port: 8888 });
+wss.on('connection', (ws) => {
+  console.log('Total clients connected : ', wss.clients.length);
+  ws.send('Thanks for connecting to this nodejs websocket server');
 
-  socket.on('disconnect', function() {
-    delete sockets[socket.id];
-    console.log("Total clients connected : ", numClients());
+  ws.on('close', () => {
+    console.log('Total clients connected : ', wss.clients.length);
   });
-  socket.on('state', function(data) {
-    var rsp_data = {};
-    // TODO: add full questions state to rsp_data
-    emit_state(socket, rsp_data);
+
+  ws.on('error', console.error);
+
+  ws.on('message', (message) => {
+    console.log('[WebSocket] Message was received: ', message);
   });
-  socket.on('action', function(data) {
-    if (data.action === 'start') {
-      if (current_state === 'idle') {
-        set_new_state('check_path');
-        var tasks = [test_db.create_dir.bind(null, database_dir),
-                      test_db.connect.bind(null, database_path),
-                      test_db.create_tables.bind(null)];
-        async.series(tasks, function(err, results) {
-          if (err) {
-            console.log('Error: ' + err.message);
-            set_new_state('idle');
-          } else {
-            // TODO: Start math test
-            // start_math_test();
-          }
-        });
-      }
-    } else if (data.action === 'next') {
-    } else if (data.action === 'prev') {
-    } else if (data.action === 'stop') {
-      // TODO: store results in database
-    }
-  });
-  // socket.on('power', function(data) {
-  //   if (data === 'reboot') {
-  //     exec('reboot', function(err, stdout, stderr) {
-  //       if (err)
-  //         console.log('reboot command error: ' + err);
-  //       else {
-  //         io.sockets.emit('power', 'reboot');
-  //         console.log('rebooting...');
-  //       }
-  //     });
-  //   } else if (data === 'shutdown') {
-  //     exec('shutdown -h now', function(err, stdout, stderr) {
-  //       if (err)
-  //         console.log('shutdown command error: ' + err);
-  //       else {
-  //         io.sockets.emit('power', 'shutdown');
-  //         console.log('shutting down...');
-  //       }
-  //     });
-  //   }
-  // });
-  socket.on('diskinfo', function() {
-    emit_diskfree(socket);
-  });
-  // socket.on('files', function(data) {
-  //   if (data === 'ls')
-  //     listFiles(socket);
-  //   else if (data === 'rm')
-  //     deleteFiles();
+
+  // Broadcast aka send messages to all connected clients 
+  // ws.on('message', (message) => {
+  //   wss.clients.forEach((client) => {
+  //     if (client.readyState === WebSocket.OPEN) {
+  //       client.send(message); 
+  //     }
+  //   });
+  //   console.log(`[WebSocket] Message ${message} was received`);
   // });
 });
+
+// var sockets = {};
+// io.on('connection', function(socket) {
+//   sockets[socket.id] = socket;
+//   console.log("Total clients connected : ", numClients());
+
+//   socket.on('disconnect', function() {
+//     delete sockets[socket.id];
+//     console.log("Total clients connected : ", numClients());
+//   });
+//   socket.on('state', function(data) {
+//     var rsp_data = {};
+//     // TODO: add full questions state to rsp_data
+//     emit_state(socket, rsp_data);
+//   });
+//   socket.on('action', function(data) {
+//     if (data.action === 'start') {
+//       if (current_state === 'idle') {
+//         set_new_state('check_path');
+//         var tasks = [test_db.create_dir.bind(null, database_dir),
+//                       test_db.connect.bind(null, database_path),
+//                       test_db.create_tables.bind(null)];
+//         async.series(tasks, function(err, results) {
+//           if (err) {
+//             console.log('Error: ' + err.message);
+//             set_new_state('idle');
+//           } else {
+//             // TODO: Start math test
+//             // start_math_test();
+//           }
+//         });
+//       }
+//     } else if (data.action === 'next') {
+//     } else if (data.action === 'prev') {
+//     } else if (data.action === 'stop') {
+//       // TODO: store results in database
+//     }
+//   });
+//   // socket.on('power', function(data) {
+//   //   if (data === 'reboot') {
+//   //     exec('reboot', function(err, stdout, stderr) {
+//   //       if (err)
+//   //         console.log('reboot command error: ' + err);
+//   //       else {
+//   //         io.sockets.emit('power', 'reboot');
+//   //         console.log('rebooting...');
+//   //       }
+//   //     });
+//   //   } else if (data === 'shutdown') {
+//   //     exec('shutdown -h now', function(err, stdout, stderr) {
+//   //       if (err)
+//   //         console.log('shutdown command error: ' + err);
+//   //       else {
+//   //         io.sockets.emit('power', 'shutdown');
+//   //         console.log('shutting down...');
+//   //       }
+//   //     });
+//   //   }
+//   // });
+//   socket.on('diskinfo', function() {
+//     emit_diskfree(socket);
+//   });
+//   // socket.on('files', function(data) {
+//   //   if (data === 'ls')
+//   //     listFiles(socket);
+//   //   else if (data === 'rm')
+//   //     deleteFiles();
+//   // });
+// });
 
 
 http.listen(80, function() {
