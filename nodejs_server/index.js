@@ -67,6 +67,10 @@ const wss = new WebSocket.Server({ port: 8888 });
 wss.on('connection', (ws) => {
   console.log('Total clients connected : ', wss.clients.length);
   ws.send('Thanks for connecting to this nodejs websocket server');
+  var data = {};
+  data.type = 'hello';
+  data.payload = {'mylist': [1,2,3,4,5]};
+  ws.send(JSON.stringify(data));
 
   ws.on('close', () => {
     console.log('Total clients connected : ', wss.clients.length);
